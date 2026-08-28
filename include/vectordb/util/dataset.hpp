@@ -46,7 +46,23 @@ enum class DatasetKind : std::uint8_t {
 struct DatasetSpec {
     Dimension dimension = 128;
     std::size_t count = 10000;
+
+    /// Seeds the dataset's *structure* — where the cluster centroids are.
+    ///
+    /// Queries deliberately share this with their dataset. A query drawn from a
+    /// different cluster structure lands in empty space between clusters, where
+    /// its 1st and 10th nearest neighbours are within a few percent of each
+    /// other. Recall measured on such a query is measuring tie-breaking among
+    /// near-equidistant points, not index quality, and it looks catastrophically
+    /// bad for reasons that have nothing to do with the index.
     std::uint64_t seed = 42;
+
+    /// Seeds *which points are drawn* from that structure.
+    ///
+    /// `generate_queries` varies this and holds `seed` fixed, so queries are
+    /// realistic in-distribution points rather than members of the dataset.
+    std::uint64_t sample_seed = 42;
+
     DatasetKind kind = DatasetKind::kClustered;
 
     /// Only for `kClustered`. 0 means "pick a sensible number", currently

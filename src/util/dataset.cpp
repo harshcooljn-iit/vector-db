@@ -67,7 +67,12 @@ VectorArray generate_dataset(const DatasetSpec& spec) {
     VectorArray vectors(spec.dimension);
     vectors.reserve(spec.count);
 
-    DeterministicRng rng(spec.seed);
+    // Two independent streams. `structure_rng` places the cluster centroids and
+    // is driven by `seed`; `rng` draws the individual points and is driven by
+    // `sample_seed`. Keeping them separate is what lets a query set share a
+    // dataset's clusters while being different points — see DatasetSpec.
+    DeterministicRng structure_rng(spec.seed);
+    DeterministicRng rng(spec.sample_seed);
     std::vector<float> scratch(spec.dimension);
 
     switch (spec.kind) {
@@ -99,7 +104,7 @@ VectorArray generate_dataset(const DatasetSpec& spec) {
             centroids.reserve(clusters);
             for (std::size_t c = 0; c < clusters; ++c) {
                 for (Dimension d = 0; d < spec.dimension; ++d) {
-                    scratch[d] = rng.normal();
+                    scratch[d] = structure_rng.normal();
                 }
                 centroids.push_back(scratch);
             }
@@ -124,11 +129,19 @@ VectorArray generate_dataset(const DatasetSpec& spec) {
 VectorArray generate_queries(const DatasetSpec& spec, std::size_t count) {
     DatasetSpec query_spec = spec;
     query_spec.count = count;
-    // A different seed, derived from the dataset's, so queries follow the same
-    // distribution without being members of the dataset — searching for points
-    // that are literally in the index measures nothing interesting.
-    std::uint64_t derived = spec.seed;
-    query_spec.seed = splitmix64(derived);
+
+    // `seed` is held fixed so the queries inhabit the *same* cluster structure
+    // as the dataset; only `sample_seed` moves, so they are different points.
+    //
+    // Deriving both — the obvious thing, and what this originally did — puts
+    // the queries in a different cluster layout entirely, so every query lands
+    // in the empty space between the dataset's clusters. Measured on a 64-d,
+    // 5000-point set, such a query's 10th nearest neighbour was 3% further away
+    // than its 1st, against 44% for a real in-distribution point. Recall on
+    // those queries measures tie-breaking among near-equidistant points and
+    // reports ~0.75 for an index that is actually returning ~0.99.
+    std::uint64_t derived = spec.sample_seed;
+    query_spec.sample_seed = splitmix64(derived);
     return generate_dataset(query_spec);
 }
 
