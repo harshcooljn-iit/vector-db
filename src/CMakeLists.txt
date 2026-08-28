@@ -3,5 +3,6 @@
 add_subdirectory(core)
 add_subdirectory(distance)
 add_subdirectory(index)
+add_subdirectory(persistence)
 add_subdirectory(storage)
 add_subdirectory(util)
