@@ -9,6 +9,8 @@ target_sources(vectordb_tests PRIVATE
     distance_metric_test.cpp
     index_brute_force_test.cpp
     persistence_byte_io_test.cpp
+    storage_filter_test.cpp
+    storage_metadata_store_test.cpp
     storage_vector_file_test.cpp
     storage_vector_store_test.cpp
     util_dataset_test.cpp
