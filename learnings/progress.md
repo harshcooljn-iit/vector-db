@@ -3,7 +3,7 @@
 What is **actually implemented**, updated when a milestone genuinely lands.
 Nothing is ticked here on the strength of a plan.
 
-Last updated: phase 4 complete.
+Last updated: phase 5 complete.
 
 ## Foundations
 
@@ -30,8 +30,8 @@ Last updated: phase 4 complete.
 
 ## Indexes
 
-- [ ] Index interface
-- [ ] Brute-force index
+- [x] Index interface
+- [x] Brute-force index
 - [ ] HNSW graph construction
 - [ ] HNSW search
 - [ ] Neighbour selection / pruning
@@ -51,8 +51,8 @@ Last updated: phase 4 complete.
 ## Database engineering
 
 - [ ] Database lifecycle (create / open / close)
-- [ ] Insert, get, delete
-- [ ] Tombstones
+- [x] Insert, get, delete (in-memory store)
+- [x] Tombstones (store level)
 - [ ] Index rebuild
 - [ ] Compaction
 - [ ] Crash-safety reasoning documented
@@ -81,7 +81,7 @@ Last updated: phase 4 complete.
 
 ## Benchmarks
 
-- [ ] Deterministic dataset generator
+- [x] Deterministic dataset generator
 - [ ] Distance kernel benchmark
 - [ ] Brute-force latency
 - [ ] HNSW latency
@@ -102,6 +102,7 @@ Last updated: phase 4 complete.
 - [x] `learnings/30-vector-database/01`, `02`, `03` (what/why, representations, metrics)
 - [x] `docs/distance-metrics.md`
 - [x] `learnings/30-vector-database/04-top-k-search.md`
+- [x] `learnings/40-search-indexes/01-brute-force-index.md`
 - [x] `README.md`
 - [ ] `docs/architecture.md`
 - [ ] remaining `docs/` pages
