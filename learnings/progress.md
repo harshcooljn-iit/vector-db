@@ -3,7 +3,7 @@
 What is **actually implemented**, updated when a milestone genuinely lands.
 Nothing is ticked here on the strength of a plan.
 
-Last updated: phase 5 complete.
+Last updated: phase 6 complete.
 
 ## Foundations
 
@@ -39,13 +39,13 @@ Last updated: phase 5 complete.
 
 ## Storage and persistence
 
-- [ ] Binary serialization primitives
-- [ ] Vector file format (versioned)
-- [ ] Memory-mapped reads
+- [x] Binary serialization primitives
+- [x] Vector file format (versioned)
+- [x] Memory-mapped reads (load path; direct search over a mapping is not done)
 - [ ] SQLite metadata store
 - [ ] Database configuration persistence
 - [ ] HNSW index persistence
-- [ ] Atomic file replacement
+- [x] Atomic file replacement
 - [ ] Corruption detection / `vectordb check`
 
 ## Database engineering
@@ -103,6 +103,9 @@ Last updated: phase 5 complete.
 - [x] `docs/distance-metrics.md`
 - [x] `learnings/30-vector-database/04-top-k-search.md`
 - [x] `learnings/40-search-indexes/01-brute-force-index.md`
+- [x] `learnings/50-storage/02`, `03` (binary formats, mmap)
+- [x] `learnings/10-cpp-systems-foundations/06-system-calls.md`
+- [x] `docs/vector-storage.md`
 - [x] `README.md`
 - [ ] `docs/architecture.md`
 - [ ] remaining `docs/` pages
