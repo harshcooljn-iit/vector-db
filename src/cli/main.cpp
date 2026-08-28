@@ -11,7 +11,6 @@
 #include <string_view>
 #include <vector>
 
-#include <vectordb/core/error.hpp>
 #include <vectordb/core/version.hpp>
 
 namespace {
@@ -59,9 +58,6 @@ int main(int argc, char** argv) {
                      static_cast<int>(command.size()), command.data());
         print_usage();
         return kExitUsage;
-    } catch (const vectordb::Error& error) {
-        std::fprintf(stderr, "vectordb: %s\n", error.what());
-        return kExitError;
     } catch (const std::exception& error) {
         std::fprintf(stderr, "vectordb: unexpected failure: %s\n", error.what());
         return kExitError;
