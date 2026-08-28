@@ -4,4 +4,6 @@ target_sources(vectordb_tests PRIVATE
     core_vector_array_test.cpp
     core_vector_test.cpp
     core_version_test.cpp
+    distance_kernel_test.cpp
+    distance_metric_test.cpp
 )
