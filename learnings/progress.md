@@ -3,7 +3,7 @@
 What is **actually implemented**, updated when a milestone genuinely lands.
 Nothing is ticked here on the strength of a plan.
 
-Last updated: phase 3 complete.
+Last updated: phase 4 complete.
 
 ## Foundations
 
@@ -23,7 +23,7 @@ Last updated: phase 3 complete.
 - [x] Vector validation (dimension, NaN/Inf)
 - [x] Scalar distance kernels (L2², cosine, inner product)
 - [x] Normalization
-- [ ] Top-k selection
+- [x] Top-k selection
 - [ ] SIMD kernels (NEON)
 - [ ] SIMD kernels (AVX2)
 - [x] Runtime kernel dispatch (scaffolding; only scalar registered so far)
@@ -66,7 +66,7 @@ Last updated: phase 3 complete.
 
 ## Query features
 
-- [ ] Top-k search API
+- [x] Top-k result types and merging
 - [ ] Metadata filtering
 - [ ] Filter + ANN semantics documented
 
@@ -101,6 +101,7 @@ Last updated: phase 3 complete.
 - [x] `learnings/10-cpp-systems-foundations/03-memory-layout.md`
 - [x] `learnings/30-vector-database/01`, `02`, `03` (what/why, representations, metrics)
 - [x] `docs/distance-metrics.md`
+- [x] `learnings/30-vector-database/04-top-k-search.md`
 - [x] `README.md`
 - [ ] `docs/architecture.md`
 - [ ] remaining `docs/` pages
