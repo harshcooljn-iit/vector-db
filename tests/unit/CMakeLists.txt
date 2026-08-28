@@ -1,5 +1,6 @@
 target_sources(vectordb_tests PRIVATE
     core_error_test.cpp
+    core_top_k_test.cpp
     core_types_test.cpp
     core_vector_array_test.cpp
     core_vector_test.cpp
