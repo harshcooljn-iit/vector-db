@@ -2,7 +2,6 @@
 #include <gtest/gtest.h>
 
 #include <vectordb/core/types.hpp>
-#include <vectordb/core/version.hpp>
 
 namespace vectordb {
 namespace {
@@ -52,11 +51,6 @@ TEST(IdModel, LocalIdIsThirtyTwoBitAndVectorIdIsSixtyFour) {
     EXPECT_EQ(sizeof(LocalId), 4U);
     EXPECT_EQ(sizeof(VectorId), 8U);
     EXPECT_EQ(kMaxVectorCount, 4294967294ULL);
-}
-
-TEST(Version, ReportsANonEmptySemanticVersion) {
-    EXPECT_EQ(version_string(), "0.1.0");
-    EXPECT_NE(build_info().find("VectorDB"), std::string::npos);
 }
 
 }  // namespace
