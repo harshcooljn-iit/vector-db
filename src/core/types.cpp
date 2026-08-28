@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-#include <vectordb/core/types.hpp>
-
 #include <array>
 #include <utility>
+
+#include <vectordb/core/types.hpp>
 
 namespace vectordb {
 namespace {
@@ -29,9 +29,12 @@ constexpr std::array<std::pair<std::string_view, IndexType>, 4> kIndexNames{{
 
 std::string_view metric_name(Metric metric) noexcept {
     switch (metric) {
-        case Metric::kL2Squared:    return "l2";
-        case Metric::kCosine:       return "cosine";
-        case Metric::kInnerProduct: return "dot";
+        case Metric::kL2Squared:
+            return "l2";
+        case Metric::kCosine:
+            return "cosine";
+        case Metric::kInnerProduct:
+            return "dot";
     }
     return "unknown";
 }
@@ -48,8 +51,10 @@ bool parse_metric(std::string_view name, Metric& out) noexcept {
 
 std::string_view index_type_name(IndexType type) noexcept {
     switch (type) {
-        case IndexType::kBruteForce: return "brute_force";
-        case IndexType::kHnsw:       return "hnsw";
+        case IndexType::kBruteForce:
+            return "brute_force";
+        case IndexType::kHnsw:
+            return "hnsw";
     }
     return "unknown";
 }

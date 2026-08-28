@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-#include <vectordb/core/version.hpp>
-
 #include <string>
+
+#include <vectordb/core/version.hpp>
 
 namespace vectordb {
 namespace {

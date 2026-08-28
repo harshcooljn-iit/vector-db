@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-#include <gtest/gtest.h>
-
 #include <string>
+
+#include <gtest/gtest.h>
 
 #include <vectordb/core/version.hpp>
 

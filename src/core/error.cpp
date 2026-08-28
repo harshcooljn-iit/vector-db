@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-#include <vectordb/core/error.hpp>
-
 #include <array>
 #include <cstring>
 #include <string>
+
+#include <vectordb/core/error.hpp>
 
 namespace vectordb {
 namespace {
@@ -29,15 +29,14 @@ std::string describe_errno(int error_number) {
 }  // namespace
 
 DimensionMismatchError::DimensionMismatchError(Dimension expected, Dimension actual)
-    : InvalidArgumentError("vector dimension mismatch: database dimension = " +
-                           std::to_string(expected) +
-                           ", input dimension = " + std::to_string(actual)),
+    : InvalidArgumentError(
+          "vector dimension mismatch: database dimension = " + std::to_string(expected) +
+          ", input dimension = " + std::to_string(actual)),
       expected_(expected),
       actual_(actual) {}
 
 DuplicateIdError::DuplicateIdError(VectorId id)
-    : Error("vector id " + std::to_string(id) +
-            " already exists (duplicate policy = reject)"),
+    : Error("vector id " + std::to_string(id) + " already exists (duplicate policy = reject)"),
       id_(id) {}
 
 IoError IoError::from_errno(std::string_view operation,

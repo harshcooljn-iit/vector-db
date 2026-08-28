@@ -38,6 +38,7 @@ public:
     DimensionMismatchError(Dimension expected, Dimension actual);
 
     [[nodiscard]] Dimension expected() const noexcept { return expected_; }
+
     [[nodiscard]] Dimension actual() const noexcept { return actual_; }
 
 private:

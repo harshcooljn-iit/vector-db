@@ -3,10 +3,10 @@
 // These tests assert on *message content*, not just on exception type.
 // A message that omits the offending values is a defect: the whole point of
 // the hierarchy is that a user can act on what they read.
-#include <gtest/gtest.h>
-
 #include <cerrno>
 #include <string>
+
+#include <gtest/gtest.h>
 
 #include <vectordb/core/error.hpp>
 

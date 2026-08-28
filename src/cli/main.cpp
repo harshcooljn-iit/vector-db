@@ -55,8 +55,10 @@ int main(int argc, char** argv) {
             return kExitOk;
         }
 
-        std::fprintf(stderr, "vectordb: unknown command '%.*s'\n",
-                     static_cast<int>(command.size()), command.data());
+        std::fprintf(stderr,
+                     "vectordb: unknown command '%.*s'\n",
+                     static_cast<int>(command.size()),
+                     command.data());
         print_usage();
         return kExitUsage;
     } catch (const vectordb::Error& error) {

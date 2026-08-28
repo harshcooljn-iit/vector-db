@@ -8,8 +8,7 @@ add_executable(vectordb_tests)
 target_link_libraries(vectordb_tests PRIVATE
     vectordb
     vectordb_warnings
-    GTest::gtest
-    GTest::gtest_main
+    GTest::gtest_main   # transitively brings GTest::gtest
 )
 
 target_include_directories(vectordb_tests PRIVATE

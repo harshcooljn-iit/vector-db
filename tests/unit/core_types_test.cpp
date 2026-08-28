@@ -7,8 +7,7 @@ namespace vectordb {
 namespace {
 
 TEST(MetricNames, RoundTripsThroughCanonicalSpelling) {
-    for (const Metric metric :
-         {Metric::kL2Squared, Metric::kCosine, Metric::kInnerProduct}) {
+    for (const Metric metric : {Metric::kL2Squared, Metric::kCosine, Metric::kInnerProduct}) {
         Metric parsed{};
         ASSERT_TRUE(parse_metric(metric_name(metric), parsed))
             << "canonical name " << metric_name(metric) << " must parse back";

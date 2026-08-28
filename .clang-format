@@ -18,8 +18,11 @@ SeparateDefinitionBlocks: Always
 SpaceAfterTemplateKeyword: false
 
 IncludeBlocks: Regroup
+# Include order, widest dependency first:
+#   standard library -> platform -> third party -> our public -> our private.
+# Every header must be self-contained (compile on its own), so the ordering is
+# a readability rule, not a load-bearing one.
 IncludeCategories:
-  # Matching header (handled by IncludeIsMainRegex) -> priority 0
   - Regex: '^<[a-z_]+>$'          # C++ standard library
     Priority: 1
   - Regex: '^<(sys|arm|x86|mach)/.*>$'  # platform headers
