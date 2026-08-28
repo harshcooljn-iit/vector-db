@@ -2,3 +2,6 @@
 # adding a file touches only the module it belongs to.
 add_subdirectory(core)
 add_subdirectory(distance)
+add_subdirectory(index)
+add_subdirectory(storage)
+add_subdirectory(util)
