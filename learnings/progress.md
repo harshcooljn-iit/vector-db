@@ -3,7 +3,7 @@
 What is **actually implemented**, updated when a milestone genuinely lands.
 Nothing is ticked here on the strength of a plan.
 
-Last updated: phase 2 complete.
+Last updated: phase 3 complete.
 
 ## Foundations
 
@@ -21,12 +21,12 @@ Last updated: phase 2 complete.
 
 - [x] Contiguous vector storage (in memory)
 - [x] Vector validation (dimension, NaN/Inf)
-- [ ] Scalar distance kernels (L2², cosine, inner product)
+- [x] Scalar distance kernels (L2², cosine, inner product)
 - [x] Normalization
 - [ ] Top-k selection
 - [ ] SIMD kernels (NEON)
 - [ ] SIMD kernels (AVX2)
-- [ ] Runtime CPU dispatch
+- [x] Runtime kernel dispatch (scaffolding; only scalar registered so far)
 
 ## Indexes
 
@@ -99,7 +99,8 @@ Last updated: phase 2 complete.
 - [x] `learnings/02-how-to-navigate-the-codebase.md`
 - [x] `learnings/20-build-and-dependencies/` (CMake, vcpkg, build configs)
 - [x] `learnings/10-cpp-systems-foundations/03-memory-layout.md`
-- [x] `learnings/30-vector-database/01`, `02` (what/why, representations)
+- [x] `learnings/30-vector-database/01`, `02`, `03` (what/why, representations, metrics)
+- [x] `docs/distance-metrics.md`
 - [x] `README.md`
 - [ ] `docs/architecture.md`
 - [ ] remaining `docs/` pages
