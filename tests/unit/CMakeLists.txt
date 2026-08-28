@@ -7,4 +7,7 @@ target_sources(vectordb_tests PRIVATE
     core_version_test.cpp
     distance_kernel_test.cpp
     distance_metric_test.cpp
+    index_brute_force_test.cpp
+    storage_vector_store_test.cpp
+    util_dataset_test.cpp
 )
