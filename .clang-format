@@ -1,0 +1,32 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+Standard: c++20
+
+ColumnLimit: 96
+IndentWidth: 4
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+DerivePointerAlignment: false
+PointerAlignment: Left
+SeparateDefinitionBlocks: Always
+SpaceAfterTemplateKeyword: false
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Matching header (handled by IncludeIsMainRegex) -> priority 0
+  - Regex: '^<[a-z_]+>$'          # C++ standard library
+    Priority: 1
+  - Regex: '^<(sys|arm|x86|mach)/.*>$'  # platform headers
+    Priority: 2
+  - Regex: '^<(spdlog|nlohmann|gtest|gmock|sqlite3)'  # third party
+    Priority: 3
+  - Regex: '^<vectordb/'          # our public headers
+    Priority: 4
+  - Regex: '.*'                   # our private headers
+    Priority: 5

@@ -1,0 +1,55 @@
+# ---- Build output ----
+build/
+build-*/
+out/
+cmake-build-*/
+vcpkg_installed/
+install/
+
+# ---- CMake ----
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+compile_commands.json
+.cmake/
+
+# ---- Generated databases / datasets / benchmark artifacts ----
+*.vdb/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.bin
+*.fvecs
+*.ivecs
+datasets/
+bench-out/
+scratch/
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Editors / IDEs ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.clangd/
+.cache/
+
+# ---- macOS ----
+.DS_Store
+._*
+
+# ---- Profiling ----
+*.trace
+perf.data*
+*.dSYM/
+
+# ---- Private build brief ----
+# The specification this repository was implemented against. Kept out of the
+# published tree because it is a working document, not part of the product.
+claude-code/

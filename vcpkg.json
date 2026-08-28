@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "vectordb",
+  "version": "0.1.0",
+  "description": "A local-first vector database in C++20 with brute-force and HNSW indexes.",
+  "homepage": "https://github.com/harsh/vectordb",
+  "license": "MIT",
+  "builtin-baseline": "ca18538bf88b72c41056b866695de13966ed6889",
+  "dependencies": [
+    "nlohmann-json",
+    "spdlog",
+    "sqlite3"
+  ],
+  "features": {
+    "tests": {
+      "description": "Build the unit and integration test suites",
+      "dependencies": [
+        "gtest"
+      ]
+    }
+  }
+}
