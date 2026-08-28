@@ -18,3 +18,4 @@ Trade-offs · Consequences · Alternatives for future versions.
 | [0007](ADR-0007-nan-policy.md) | Reject non-finite components at insertion | Accepted |
 | [0008](ADR-0008-validate-on-load.md) | Validate every persisted artefact before trusting it | Accepted |
 | [0009](ADR-0009-exceptions.md) | Report failures with exceptions, not error codes | Accepted |
+| [0010](ADR-0010-sqlite-for-metadata.md) | SQLite for metadata, our own format for vectors | Accepted |

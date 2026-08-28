@@ -3,7 +3,7 @@
 What is **actually implemented**, updated when a milestone genuinely lands.
 Nothing is ticked here on the strength of a plan.
 
-Last updated: phase 6 complete.
+Last updated: phase 7 complete.
 
 ## Foundations
 
@@ -42,8 +42,8 @@ Last updated: phase 6 complete.
 - [x] Binary serialization primitives
 - [x] Vector file format (versioned)
 - [x] Memory-mapped reads (load path; direct search over a mapping is not done)
-- [ ] SQLite metadata store
-- [ ] Database configuration persistence
+- [x] SQLite metadata store
+- [x] Database configuration persistence (schema_info table)
 - [ ] HNSW index persistence
 - [x] Atomic file replacement
 - [ ] Corruption detection / `vectordb check`
@@ -67,7 +67,7 @@ Last updated: phase 6 complete.
 ## Query features
 
 - [x] Top-k result types and merging
-- [ ] Metadata filtering
+- [x] Metadata filter language and evaluator (search integration pending)
 - [ ] Filter + ANN semantics documented
 
 ## CLI
@@ -106,6 +106,8 @@ Last updated: phase 6 complete.
 - [x] `learnings/50-storage/02`, `03` (binary formats, mmap)
 - [x] `learnings/10-cpp-systems-foundations/06-system-calls.md`
 - [x] `docs/vector-storage.md`
+- [x] `docs/metadata.md`
+- [x] `learnings/50-storage/04-sqlite.md`
 - [x] `README.md`
 - [ ] `docs/architecture.md`
 - [ ] remaining `docs/` pages
