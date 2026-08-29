@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include <algorithm>
 #include <map>
+#include <mutex>
 #include <utility>
 
 #include <vectordb/core/error.hpp>
@@ -115,6 +116,37 @@ public:
     std::unique_ptr<sql::Statement> get_config_value;
     std::unique_ptr<sql::Transaction> transaction;
 
+    /// Guards every use of a prepared statement.
+    ///
+    /// Prepared statements are shared and stateful, so even a const read
+    /// mutates them. See the class comment in metadata_store.hpp.
+    std::mutex mutex;
+
+    // The transaction helpers, without the lock. Callers that already hold
+    // `mutex` use these; the public methods take the lock and delegate. A
+    // recursive_mutex would avoid the split and would also hide which methods
+    // expect to be called with the lock held.
+    void begin_locked() {
+        if (depth++ == 0) {
+            transaction = std::make_unique<sql::Transaction>(connection);
+        }
+    }
+
+    void commit_locked() {
+        if (depth == 0) {
+            return;
+        }
+        if (--depth == 0) {
+            transaction->commit();
+            transaction.reset();
+        }
+    }
+
+    void rollback_locked() noexcept {
+        depth = 0;
+        transaction.reset();  // ~Transaction rolls back
+    }
+
     /// Nesting depth. set() opens a transaction internally and may be called
     /// from inside a caller's in_transaction block, so the two must compose.
     /// Only the outermost begin/commit pair touches SQLite; SQLite has
@@ -141,7 +173,9 @@ void MetadataStore::set(VectorId id, const Metadata& metadata) {
 
     // Replace semantics: clear then insert, in one transaction so a failure
     // part-way through does not leave the old and new keys mixed together.
-    in_transaction([&] {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
+    impl_->begin_locked();
+    try {
         impl_->delete_by_vector->bind_int64(1, static_cast<std::int64_t>(id));
         impl_->delete_by_vector->run();
 
@@ -152,7 +186,11 @@ void MetadataStore::set(VectorId id, const Metadata& metadata) {
             impl_->bind_value(statement, value);
             statement.run();
         }
-    });
+    } catch (...) {
+        impl_->rollback_locked();
+        throw;
+    }
+    impl_->commit_locked();
 }
 
 void MetadataStore::set_key(VectorId id, std::string_view key, const MetadataValue& value) {
@@ -167,6 +205,7 @@ void MetadataStore::set_key(VectorId id, std::string_view key, const MetadataVal
 }
 
 Metadata MetadataStore::get(VectorId id) const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     Metadata metadata;
     sql::Statement& statement = *impl_->select_by_vector;
     statement.bind_int64(1, static_cast<std::int64_t>(id));
@@ -194,6 +233,7 @@ Metadata MetadataStore::get(VectorId id) const {
 }
 
 bool MetadataStore::remove_key(VectorId id, std::string_view key) {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     sql::Statement count(impl_->connection,
                          "SELECT COUNT(*) FROM metadata WHERE vector_id = ? AND key = ?");
     count.bind_int64(1, static_cast<std::int64_t>(id));
@@ -212,6 +252,7 @@ bool MetadataStore::remove_key(VectorId id, std::string_view key) {
 }
 
 bool MetadataStore::remove(VectorId id) {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     sql::Statement count(impl_->connection,
                          "SELECT COUNT(*) FROM metadata WHERE vector_id = ?");
     count.bind_int64(1, static_cast<std::int64_t>(id));
@@ -228,6 +269,7 @@ bool MetadataStore::remove(VectorId id) {
 }
 
 std::vector<VectorId> MetadataStore::matching(const Filter& filter) const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     // Evaluation happens in C++ over the reconstructed metadata, not as
     // generated SQL.
     //
@@ -292,6 +334,7 @@ std::unordered_set<VectorId> MetadataStore::matching_set(const Filter& filter) c
 }
 
 std::size_t MetadataStore::vector_count() const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     sql::Statement statement(impl_->connection,
                              "SELECT COUNT(DISTINCT vector_id) FROM metadata");
     const std::size_t count =
@@ -300,11 +343,13 @@ std::size_t MetadataStore::vector_count() const {
 }
 
 std::size_t MetadataStore::row_count() const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     sql::Statement statement(impl_->connection, "SELECT COUNT(*) FROM metadata");
     return statement.step() ? static_cast<std::size_t>(statement.column_int64(0)) : 0;
 }
 
 std::vector<std::string> MetadataStore::keys() const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     std::vector<std::string> result;
     sql::Statement statement(impl_->connection,
                              "SELECT DISTINCT key FROM metadata ORDER BY key");
@@ -315,12 +360,14 @@ std::vector<std::string> MetadataStore::keys() const {
 }
 
 void MetadataStore::set_config(std::string_view key, std::string_view value) {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     impl_->set_config_value->bind_text(1, key);
     impl_->set_config_value->bind_text(2, value);
     impl_->set_config_value->run();
 }
 
 std::optional<std::string> MetadataStore::get_config(std::string_view key) const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     sql::Statement& statement = *impl_->get_config_value;
     statement.bind_text(1, key);
     std::optional<std::string> value;
@@ -332,6 +379,7 @@ std::optional<std::string> MetadataStore::get_config(std::string_view key) const
 }
 
 std::vector<std::pair<std::string, std::string>> MetadataStore::all_config() const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     std::vector<std::pair<std::string, std::string>> entries;
     sql::Statement statement(impl_->connection,
                              "SELECT key, value FROM schema_info ORDER BY key");
@@ -343,6 +391,7 @@ std::vector<std::pair<std::string, std::string>> MetadataStore::all_config() con
 
 std::vector<VectorId> MetadataStore::orphaned_ids(
     const std::unordered_set<VectorId>& live_ids) const {
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
     std::vector<VectorId> orphans;
     sql::Statement statement(impl_->connection,
                              "SELECT DISTINCT vector_id FROM metadata ORDER BY vector_id");
@@ -356,41 +405,43 @@ std::vector<VectorId> MetadataStore::orphaned_ids(
 }
 
 std::size_t MetadataStore::remove_orphans(const std::unordered_set<VectorId>& live_ids) {
+    // orphaned_ids takes the lock itself, so it must be called before we do.
     const std::vector<VectorId> orphans = orphaned_ids(live_ids);
     if (orphans.empty()) {
         return 0;
     }
-    in_transaction([&] {
+
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
+    impl_->begin_locked();
+    try {
         for (const VectorId id : orphans) {
             impl_->delete_by_vector->bind_int64(1, static_cast<std::int64_t>(id));
             impl_->delete_by_vector->run();
         }
-    });
+    } catch (...) {
+        impl_->rollback_locked();
+        throw;
+    }
+    impl_->commit_locked();
     return orphans.size();
 }
 
 void MetadataStore::begin_transaction() {
-    if (impl_->depth++ == 0) {
-        impl_->transaction = std::make_unique<sql::Transaction>(impl_->connection);
-    }
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
+    impl_->begin_locked();
 }
 
 void MetadataStore::commit_transaction() {
-    if (impl_->depth == 0) {
-        return;
-    }
-    if (--impl_->depth == 0) {
-        impl_->transaction->commit();
-        impl_->transaction.reset();
-    }
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
+    impl_->commit_locked();
 }
 
 void MetadataStore::rollback_transaction() noexcept {
     // An inner failure aborts the whole outer transaction, not just its own
     // frame. That is the conservative reading and the right one: a caller whose
     // nested write failed has no basis for believing the rest succeeded.
-    impl_->depth = 0;
-    impl_->transaction.reset();  // ~Transaction rolls back
+    const std::lock_guard<std::mutex> lock(impl_->mutex);
+    impl_->rollback_locked();
 }
 
 }  // namespace vectordb

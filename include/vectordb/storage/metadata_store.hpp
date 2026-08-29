@@ -118,6 +118,7 @@ private:
     class Impl;
     std::unique_ptr<Impl> impl_;
 
+    // Public entry points that lock, then delegate to the unlocked forms.
     void begin_transaction();
     void commit_transaction();
     void rollback_transaction() noexcept;
