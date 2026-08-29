@@ -20,4 +20,5 @@ Trade-offs · Consequences · Alternatives for future versions.
 | [0009](ADR-0009-exceptions.md) | Report failures with exceptions, not error codes | Accepted |
 | [0010](ADR-0010-sqlite-for-metadata.md) | SQLite for metadata, our own format for vectors | Accepted |
 | [0011](ADR-0011-tombstones.md) | Delete with tombstones, reclaim on compaction | Accepted |
+| [0012](ADR-0012-simd-dispatch.md) | A kernel table selected at runtime | Accepted |
 | [0013](ADR-0013-concurrency.md) | Reader-writer lock in an opt-in wrapper | Accepted |
