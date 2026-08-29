@@ -1,4 +1,5 @@
 target_sources(vectordb_tests PRIVATE
+    concurrency_thread_pool_test.cpp
     core_error_test.cpp
     core_top_k_test.cpp
     core_types_test.cpp
