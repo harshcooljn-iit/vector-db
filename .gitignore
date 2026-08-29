@@ -53,3 +53,6 @@ perf.data*
 # The specification this repository was implemented against. Kept out of the
 # published tree because it is a working document, not part of the product.
 claude-code/
+
+# Example output
+examples/out/
