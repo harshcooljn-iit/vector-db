@@ -58,6 +58,14 @@ jobs:
       - name: Smoke-test the CLI
         run: ./build/${{ matrix.preset }}/bin/vectordb version
 
+  docs:
+    name: documentation links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check that every relative link resolves
+        run: ./scripts/check-links.py
+
   format:
     name: clang-format
     runs-on: ubuntu-latest

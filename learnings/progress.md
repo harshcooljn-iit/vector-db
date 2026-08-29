@@ -1,116 +1,117 @@
 # Progress
 
-What is **actually implemented**, updated when a milestone genuinely lands.
-Nothing is ticked here on the strength of a plan.
+What is **actually implemented**. Nothing is ticked here on the strength of a
+plan.
 
-Last updated: phase 7 complete.
+Last updated: v1 complete. 327 tests passing; measured results in
+[`docs/benchmark-results.md`](../docs/benchmark-results.md).
 
 ## Foundations
 
 - [x] Repository structure
 - [x] CMake project with Ninja
-- [x] vcpkg manifest with pinned baseline
+- [x] vcpkg manifest with a pinned baseline
 - [x] Build configurations (debug / release / relwithdebinfo / asan / tsan)
 - [x] GoogleTest harness wired to CTest
 - [x] Error hierarchy
 - [x] Id model (`VectorId` / `LocalId`) and metric vocabulary
-- [x] clang-format / clang-tidy scripts
-- [x] CI (linux + macos, debug + release, format, asan)
+- [x] clang-format / clang-tidy configuration and scripts
+- [x] CI: linux + macos, debug + release, format, links, AddressSanitizer
 
 ## Vector model and math
 
-- [x] Contiguous vector storage (in memory)
+- [x] Contiguous vector storage
 - [x] Vector validation (dimension, NaN/Inf)
 - [x] Scalar distance kernels (L2², cosine, inner product)
 - [x] Normalization
-- [x] Top-k selection
-- [ ] SIMD kernels (NEON)
-- [ ] SIMD kernels (AVX2)
-- [x] Runtime kernel dispatch (scaffolding; only scalar registered so far)
+- [x] Top-k selection with a deterministic total order
+- [x] SIMD kernels (NEON) — measured 3.6–4.1× over scalar
+- [x] SIMD kernels (AVX2) — implemented and guarded, **never run on x86 hardware**
+- [x] Runtime CPU dispatch, including the XCR0 check
 
 ## Indexes
 
 - [x] Index interface
-- [x] Brute-force index
-- [ ] HNSW graph construction
-- [ ] HNSW search
-- [ ] Neighbour selection / pruning
-- [ ] Recall cross-check against brute force
+- [x] Brute-force index (the oracle)
+- [x] HNSW graph construction
+- [x] HNSW search
+- [x] Neighbour selection heuristic with re-pruning
+- [x] Recall cross-check against brute force — 0.999 at efSearch 10
 
 ## Storage and persistence
 
-- [x] Binary serialization primitives
-- [x] Vector file format (versioned)
-- [x] Memory-mapped reads (load path; direct search over a mapping is not done)
+- [x] Binary serialization primitives with bounds-checked reads
+- [x] Vector file format (versioned, CRC, nine validation steps)
+- [x] Memory-mapped reads on the load path
+- [ ] Searching directly over a live mapping without materialising the store
 - [x] SQLite metadata store
-- [x] Database configuration persistence (schema_info table)
-- [ ] HNSW index persistence
-- [x] Atomic file replacement
-- [ ] Corruption detection / `vectordb check`
+- [x] Database configuration persistence
+- [x] HNSW index persistence with full reference validation
+- [x] Atomic file replacement (incl. directory fsync and `F_FULLFSYNC`)
+- [x] Corruption detection and `vectordb check --deep`
 
 ## Database engineering
 
-- [ ] Database lifecycle (create / open / close)
-- [x] Insert, get, delete (in-memory store)
-- [x] Tombstones (store level)
-- [ ] Index rebuild
-- [ ] Compaction
-- [ ] Crash-safety reasoning documented
+- [x] Database lifecycle (create / open / close / flush)
+- [x] Insert, upsert, get, delete
+- [x] Tombstones
+- [x] Index rebuild, including automatic recovery on open
+- [x] Compaction
+- [x] Crash-safety reasoning documented and its limits stated
+- [ ] Write-ahead log
 
 ## Concurrency
 
-- [ ] Reader/writer contract documented
-- [ ] Concurrent search
-- [ ] Thread pool
-- [ ] Batch search
+- [x] Reader/writer contract documented and enforced
+- [x] Concurrent search — measured 4.19× on 8 cores
+- [x] Thread pool
+- [x] Batch search
+- [x] Clean under ThreadSanitizer
+- [ ] Concurrent writers (explicitly not supported)
 
 ## Query features
 
-- [x] Top-k result types and merging
-- [x] Metadata filter language and evaluator (search integration pending)
-- [ ] Filter + ANN semantics documented
+- [x] Top-k search API
+- [x] Metadata filter language and evaluator
+- [x] Filter integrated with search, with the post-filter limitation documented
+- [x] `--exact` escape hatch for selective filters
 
 ## CLI
 
 - [x] `version`, `help`
-- [ ] `create`, `info`, `stats`
-- [ ] `insert`, `get`, `delete`
-- [ ] `search`, `batch-search`
-- [ ] `rebuild-index`, `compact`, `check`
-- [ ] `--json` machine-readable output
+- [x] `create`, `info`, `stats`, `check`
+- [x] `insert`, `get`, `delete`
+- [x] `search`, `batch-search`
+- [x] `import`, `export`, `generate`
+- [x] `rebuild-index`, `compact`
+- [x] `--json` machine-readable output
+- [x] Unknown options rejected rather than ignored
 
 ## Benchmarks
 
 - [x] Deterministic dataset generator
-- [ ] Distance kernel benchmark
-- [ ] Brute-force latency
-- [ ] HNSW latency
-- [ ] HNSW recall vs efSearch
-- [ ] Insertion throughput
-- [ ] Batch search throughput
-- [ ] Index build time
-- [ ] Load time
-- [ ] Measured results recorded in `docs/benchmark-results.md`
+- [x] Distance kernel benchmark
+- [x] Brute-force latency
+- [x] HNSW latency and recall
+- [x] Insertion / build throughput
+- [x] Batch search throughput vs thread count
+- [x] Index build and load time
+- [x] Measured results in `docs/benchmark-results.md`
+- [ ] N = 1,000,000 (8 GB machine; would measure swap at D=768)
+- [ ] Comparison against FAISS or hnswlib
 
 ## Documentation
 
-- [x] `learnings/00-start-here.md`
-- [x] `learnings/01-project-overview.md`
-- [x] `learnings/02-how-to-navigate-the-codebase.md`
-- [x] `learnings/20-build-and-dependencies/` (CMake, vcpkg, build configs)
-- [x] `learnings/10-cpp-systems-foundations/03-memory-layout.md`
-- [x] `learnings/30-vector-database/01`, `02`, `03` (what/why, representations, metrics)
-- [x] `docs/distance-metrics.md`
-- [x] `learnings/30-vector-database/04-top-k-search.md`
-- [x] `learnings/40-search-indexes/01-brute-force-index.md`
-- [x] `learnings/50-storage/02`, `03` (binary formats, mmap)
-- [x] `learnings/10-cpp-systems-foundations/06-system-calls.md`
-- [x] `docs/vector-storage.md`
-- [x] `docs/metadata.md`
-- [x] `learnings/50-storage/04-sqlite.md`
 - [x] `README.md`
-- [ ] `docs/architecture.md`
-- [ ] remaining `docs/` pages
-- [x] ADRs 0001-0009 (decisions made so far)
-- [ ] Exercises
-- [ ] Final report and capstone
+- [x] `docs/architecture.md`
+- [x] `docs/distance-metrics.md`, `brute-force.md`, `hnsw.md`
+- [x] `docs/vector-storage.md`, `hnsw-format.md`, `data-formats.md`
+- [x] `docs/persistence.md`, `metadata.md`, `concurrency.md`, `memory-layout.md`
+- [x] `docs/benchmarking.md`, `benchmark-results.md`
+- [x] `docs/testing.md`, `development.md`
+- [x] `docs/final-report.md`
+- [x] 13 architecture decision records
+- [x] 62 learning notes across 10 sections
+- [x] 10 exercises and 8 mini challenges
+- [x] 7 runnable examples
+- [x] Final capstone and roadmap
