@@ -220,6 +220,13 @@ public:
 
     // --- Maintenance ------------------------------------------------------
 
+    /// Pre-allocates for `count` vectors.
+    ///
+    /// A bulk load without this performs a logarithmic number of
+    /// reallocate-and-copy rounds over an ever-larger array — at a million
+    /// 768-dimensional vectors, the final copy alone moves 3 GB.
+    void reserve(std::size_t count);
+
     /// Writes the vector file and the index file. Idempotent, and a no-op when
     /// nothing has changed.
     void flush();
@@ -252,7 +259,15 @@ public:
     [[nodiscard]] bool empty() const noexcept { return size() == 0; }
 
     /// Ids matching a metadata filter, without any vector search.
+    ///
+    /// Note that an *empty* filter is not the same as "every vector": it
+    /// returns every vector that has metadata at all. Use `all_ids()` to
+    /// enumerate the database.
     [[nodiscard]] std::vector<VectorId> filter_ids(const Filter& filter) const;
+
+    /// Every live vector id, ascending. Used by export and by tooling that
+    /// needs to walk the database.
+    [[nodiscard]] std::vector<VectorId> all_ids() const;
 
     // --- Paths ------------------------------------------------------------
 

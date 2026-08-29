@@ -450,6 +450,18 @@ std::vector<std::vector<QueryResult>> Database::batch_search(
     return results;
 }
 
+std::vector<VectorId> Database::all_ids() const {
+    std::vector<VectorId> ids;
+    ids.reserve(impl_->store_.live_count());
+    for (LocalId slot = 0; slot < impl_->store_.slot_count(); ++slot) {
+        if (impl_->store_.live(slot)) {
+            ids.push_back(impl_->store_.vector_id(slot));
+        }
+    }
+    std::sort(ids.begin(), ids.end());
+    return ids;
+}
+
 std::vector<VectorId> Database::filter_ids(const Filter& filter) const {
     std::vector<VectorId> ids = impl_->metadata_.matching(filter);
     // Metadata rows can outlive their vector if a crash landed between the two
@@ -461,6 +473,14 @@ std::vector<VectorId> Database::filter_ids(const Filter& filter) const {
 // ---------------------------------------------------------------------------
 // Maintenance
 // ---------------------------------------------------------------------------
+
+void Database::reserve(std::size_t count) {
+    impl_->store_.reserve(count);
+    impl_->refresh_accessor();
+    if (auto* hnsw = dynamic_cast<HnswIndex*>(impl_->index_.get())) {
+        hnsw->reserve(count);
+    }
+}
 
 void Database::flush() {
     if (!impl_->dirty_) {
