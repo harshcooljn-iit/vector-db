@@ -17,6 +17,7 @@ target_include_directories(vectordb_tests PRIVATE
 )
 
 add_subdirectory(unit)
+add_subdirectory(integration)
 
 gtest_discover_tests(vectordb_tests
     DISCOVERY_MODE PRE_TEST
