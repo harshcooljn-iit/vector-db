@@ -386,7 +386,12 @@ TEST(HnswIndex, DifferentSeedsBuildDifferentGraphs) {
 TEST(HnswIndex, SearchIsRepeatable) {
     const DatasetSpec spec{.dimension = 16, .count = 800, .seed = 6};
     const Fixture fixture(spec, Metric::kL2Squared, HnswConfig{.m = 8});
-    const VectorView query = generate_queries(spec, 1)[0];
+    // The VectorArray must be held in a named variable: a VectorView into a
+    // temporary dangles the moment the full expression ends. AddressSanitizer
+    // caught this as a heap-use-after-free inside the distance kernel — which
+    // is exactly the hazard documented on VectorView.
+    const VectorArray queries = generate_queries(spec, 1);
+    const VectorView query = queries[0];
 
     const auto first = fixture.index->search(query, SearchParams{.k = 10});
     for (int trial = 0; trial < 5; ++trial) {
@@ -410,7 +415,8 @@ TEST(HnswIndex, NeverReturnsATombstonedVector) {
 
     // Delete the exact nearest neighbours of a query, then confirm none comes
     // back — the case a naive implementation gets wrong.
-    const VectorView query = generate_queries(spec, 1)[0];
+    const VectorArray queries = generate_queries(spec, 1);
+    const VectorView query = queries[0];
     const auto before = fixture.index->search(query, SearchParams{.k = 5});
     ASSERT_EQ(before.size(), 5U);
 

@@ -219,7 +219,9 @@ TEST(BruteForceIndex, SearchRangeCoversASliceAndComposesIntoTheWholeScan) {
     }
     const BruteForceIndex index(store.accessor(), Metric::kL2Squared, scalar_kernel());
 
-    const VectorView query = generate_queries(spec, 1)[0];
+    // Held in a named variable: a view into a temporary would dangle.
+    const VectorArray query_batch = generate_queries(spec, 1);
+    const VectorView query = query_batch[0];
     const std::vector<Candidate> whole = index.search(query, SearchParams{.k = 7});
 
     // Four slices, as a parallel scan would produce, merged back together.
