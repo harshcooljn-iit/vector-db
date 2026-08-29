@@ -60,6 +60,21 @@ struct QueryOptions {
     /// How much to over-fetch when filtering an approximate search.
     /// 0 uses the built-in default.
     std::size_t filter_oversample = 0;
+
+    /// Attach each result's metadata to the `QueryResult`.
+    ///
+    /// Costs one metadata lookup per returned result. Those lookups go through
+    /// `MetadataStore`, which is internally serialised because SQLite prepared
+    /// statements are stateful — so under many concurrent searches they are the
+    /// scalability limit rather than the search itself.
+    ///
+    /// Measured on this machine at N=50,000, D=128, k=10: HNSW search alone
+    /// scales 4.1x from 1 to 8 threads, while the same search *with* metadata
+    /// attached peaks at 1.8x on 2 threads and then degrades.
+    ///
+    /// Set false when you only need ids and scores. A database with no metadata
+    /// at all pays nothing either way.
+    bool include_metadata = true;
 };
 
 /// A vector plus its metadata, as returned by `get`.

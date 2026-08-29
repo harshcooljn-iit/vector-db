@@ -1,6 +1,7 @@
 target_sources(vectordb_tests PRIVATE
     cli_test.cpp
     concurrent_database_test.cpp
+    metadata_search_test.cpp
     database_test.cpp
 )
 

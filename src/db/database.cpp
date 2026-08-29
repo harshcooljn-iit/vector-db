@@ -144,6 +144,17 @@ public:
     std::unique_ptr<VectorIndex> index_;
     VectorId next_auto_id_ = 0;
     bool dirty_ = false;
+
+    /// Whether any metadata exists at all.
+    ///
+    /// Cached so that a database with no metadata — very common, and the case
+    /// every benchmark uses — never touches the metadata store during a search.
+    /// Without it, every result costs a lookup behind MetadataStore's mutex,
+    /// which serialises concurrent searches.
+    ///
+    /// Only ever set to true by a write; it is a "might have metadata" hint,
+    /// so deleting the last row leaves it stale in the safe direction.
+    bool has_metadata_ = false;
 };
 
 // ---------------------------------------------------------------------------
@@ -266,6 +277,7 @@ Database Database::open(const std::filesystem::path& directory) {
         std::make_unique<Impl>(directory, config, std::move(store), std::move(metadata));
     impl->next_auto_id_ =
         parse_u64(impl->metadata_.get_config(kKeyNextId).value_or("0"), kKeyNextId);
+    impl->has_metadata_ = impl->metadata_.vector_count() > 0;
 
     // Load the index if we can; rebuild it if we cannot. The vector store is
     // authoritative, so a bad index is never a reason to fail an open — it is a
@@ -315,6 +327,7 @@ void Database::insert(VectorId id, VectorView vector, const Metadata& metadata) 
 
     if (!metadata.empty()) {
         impl_->metadata_.set(id, metadata);
+        impl_->has_metadata_ = true;
     }
     if (id >= impl_->next_auto_id_) {
         impl_->next_auto_id_ = id + 1;
@@ -337,6 +350,7 @@ void Database::upsert(VectorId id, VectorView vector, const Metadata& metadata) 
         impl_->store_.upsert(id, vector);
         impl_->refresh_accessor();
         impl_->metadata_.set(id, metadata);
+        impl_->has_metadata_ = impl_->has_metadata_ || !metadata.empty();
         impl_->dirty_ = true;
         return;
     }
@@ -362,6 +376,7 @@ void Database::set_metadata(VectorId id, const Metadata& metadata) {
         throw NotFoundError("no vector with id " + std::to_string(id));
     }
     impl_->metadata_.set(id, metadata);
+    impl_->has_metadata_ = impl_->has_metadata_ || !metadata.empty();
 }
 
 // ---------------------------------------------------------------------------
@@ -423,15 +438,35 @@ std::vector<QueryResult> Database::search(VectorView query, const QueryOptions& 
     std::vector<QueryResult> results;
     results.reserve(std::min(options.k, candidates.size()));
 
+    // Skip the metadata store entirely when nothing needs it.
+    //
+    // This is not a micro-optimisation. Every lookup takes MetadataStore's
+    // mutex and runs a SQLite statement, and under WAL that means fcntl-based
+    // shared-memory locking. Profiling eight concurrent searchers showed 89% of
+    // search time inside MetadataStore::get, almost all of it blocked on that
+    // mutex — which turned a search that scales 4.3x across 8 threads into one
+    // that peaked at 1.8x on 2 threads and then went backwards.
+    const bool needs_metadata =
+        impl_->has_metadata_ && (has_filter || options.include_metadata);
+
     for (const Candidate& candidate : candidates) {
         if (results.size() >= options.k) {
             break;
         }
         const VectorId id = impl_->store_.vector_id(candidate.local_id);
-        Metadata metadata = impl_->metadata_.get(id);
-        if (has_filter && !options.filter.matches(metadata)) {
+
+        Metadata metadata;
+        if (needs_metadata) {
+            metadata = impl_->metadata_.get(id);
+            if (has_filter && !options.filter.matches(metadata)) {
+                continue;
+            }
+        } else if (has_filter) {
+            // A filter against a database with no metadata matches nothing: a
+            // missing key never matches, by definition (docs/metadata.md).
             continue;
         }
+
         results.push_back(QueryResult{id,
                                       score_from_rank_key(impl_->config_.metric, candidate.key),
                                       std::move(metadata)});
