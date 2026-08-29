@@ -8,6 +8,7 @@ target_sources(vectordb_tests PRIVATE
     distance_kernel_test.cpp
     distance_metric_test.cpp
     index_brute_force_test.cpp
+    index_hnsw_file_test.cpp
     index_hnsw_test.cpp
     persistence_byte_io_test.cpp
     storage_filter_test.cpp
