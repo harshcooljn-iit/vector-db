@@ -19,3 +19,5 @@ Trade-offs · Consequences · Alternatives for future versions.
 | [0008](ADR-0008-validate-on-load.md) | Validate every persisted artefact before trusting it | Accepted |
 | [0009](ADR-0009-exceptions.md) | Report failures with exceptions, not error codes | Accepted |
 | [0010](ADR-0010-sqlite-for-metadata.md) | SQLite for metadata, our own format for vectors | Accepted |
+| [0011](ADR-0011-tombstones.md) | Delete with tombstones, reclaim on compaction | Accepted |
+| [0013](ADR-0013-concurrency.md) | Reader-writer lock in an opt-in wrapper | Accepted |
