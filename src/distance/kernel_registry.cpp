@@ -13,7 +13,19 @@
 
 #include <vectordb/distance/kernel.hpp>
 
+#include "distance/cpu_features.hpp"
+
 namespace vectordb {
+
+// Declared here rather than in the public header: which SIMD kernels exist is
+// an implementation detail, and a caller asks for one by name.
+#if VECTORDB_ARCH_ARM64
+const DistanceKernel& neon_kernel() noexcept;
+#endif
+#if VECTORDB_ARCH_X86_64
+const DistanceKernel& avx2_kernel() noexcept;
+#endif
+
 namespace {
 
 /// Builds the list of kernels runnable on *this* machine, cheapest to detect
@@ -27,9 +39,25 @@ std::vector<const DistanceKernel*> detect_kernels() {
     // Always present, on every platform, by construction.
     kernels.push_back(&scalar_kernel());
 
-    // SIMD kernels are appended here as they are implemented, each guarded by
-    // both a compile-time check (is it in this binary?) and a runtime check
-    // (can this CPU run it?). See phase 15.
+    // Appended in increasing order of preference, each guarded twice: a
+    // compile-time check that the code is in this binary at all, and a runtime
+    // check that this CPU can execute it.
+    //
+    // VECTORDB_ENABLE_SIMD lets a build opt out entirely, which is how the
+    // benchmark suite compares against a scalar-only binary and how a bisect
+    // can rule SIMD in or out in one flag.
+#if defined(VECTORDB_ENABLE_SIMD) && VECTORDB_ENABLE_SIMD
+#if VECTORDB_ARCH_ARM64
+    if (cpu_supports_neon()) {
+        kernels.push_back(&neon_kernel());
+    }
+#endif
+#if VECTORDB_ARCH_X86_64
+    if (cpu_supports_avx2()) {
+        kernels.push_back(&avx2_kernel());
+    }
+#endif
+#endif
 
     return kernels;
 }
